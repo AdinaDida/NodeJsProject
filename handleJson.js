@@ -1,7 +1,8 @@
+const handleToken = require('./handleToken');
 const Joi = require('joi');
 
 const doctorsId = [];
-let doctors = [];
+const doctors = [];
 
 
 function handleInformation(req, res){
@@ -20,13 +21,16 @@ function handleInformation(req, res){
         return res.status(400).send("Id already exists!");
     }
 
+    const facilitiesIdToken = req.headerData.facility;
+    const facilities = handleToken.validateFacilities(doctor, facilitiesIdToken);
+    doctor.facility = facilities;
     doctorsId.push(doctor.id);
     doctors.push(doctor);
 
     if(req.body.active == true){
         const doctor = {
             name: req.body.name,
-            facility: req.body.facility
+            facility: facilities
         };
         res.send(doctor);
     }

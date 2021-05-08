@@ -1,3 +1,5 @@
+const handleToken = require('./handleToken');
+
 function handleInformation(req, res){
     let data = Buffer.from('');
     req.on('data', function (chunk) {
@@ -12,10 +14,18 @@ function handleInformation(req, res){
         if(validDoctors === null){
             res.send("Error: same id with different names!");
         }
+        const facilitiesIdToken = req.headerData.facility;
 
         let result = [];
-        for(doctor of validDoctors){  
-            result.push(`${doctor.name}: ${doctor.facilities.join(', ')} `)
+        for(doctor of validDoctors){
+            const facilities = handleToken.validateFacilities(doctor, facilitiesIdToken);
+            doctor.facility = facilities;
+            const facilityNames = [];
+            for(const facility of facilities){
+                facilityNames.push(facility.name)
+            }
+
+            result.push(`${doctor.name}: ${facilityNames.join(', ')} `)
         }
         res.send(result);
     });
@@ -56,13 +66,17 @@ function getValidDoctors(jsonArray){
         if(!checkedDoctor(doctors, doctor.id, doctor.name)){
             return null;
         }
+
         let facilities = [];
         for(let json of jsonArray){
             if(json.ID === doctor.id && json.Active === 'true' ){
-                facilities.push(json.NameId);
+                json.facility = {};
+                json.facility.value = json.FacilityId;
+                json.facility.name = json.NameId;
+                facilities.push(json.facility);
             }
         }
-        doctor.facilities = facilities;
+        doctor.facility = facilities;
     }
     return doctors;
 }

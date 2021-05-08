@@ -41,5 +41,17 @@ function authenticateToken(req, res, next){
 }
 
 
+function validateFacilities(doctor, tokenFacilities) {
+    const facilities = [];
+    for(const facility of doctor.facility){
+        if(tokenFacilities.includes(facility.value)){
+            facilities.push(facility);
+        }
+    }
+    return facilities;
+}
+
+
 module.exports.handleInformation = handleInformation;
 module.exports.authenticateToken = authenticateToken;
+module.exports.validateFacilities = validateFacilities;
